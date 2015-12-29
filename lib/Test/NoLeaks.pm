@@ -267,7 +267,7 @@ sub test_noleaks(%) {
 
       my @lines;
       while (my ($pass, $v) = each(%$details)) {
-        my $line = "pass $pass, leacked: "
+        my $line = "pass $pass, leaked: "
           . ($track_memory ? $v->[0] . " bytes " : "")
           . ($track_fds    ? $v->[1] . "file descriptors" : "");
         push @lines, $line;
