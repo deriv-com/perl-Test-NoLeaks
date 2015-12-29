@@ -145,7 +145,6 @@ BEGIN {
 
     open(my $statm, '<', '/proc/self/statm')
         or die("couldn't access /proc/self/status : $!");
-
     *_platform_mem_size = sub {
         my $line = <$statm>;
         seek($statm, 0, 0);
@@ -184,8 +183,6 @@ sub _noleaks {
     die("warmup_passes count too small (should be non-negative)")
         if $passes < 0;
 
-    my %leaked_at; # key: pass, value array[$mem_leak, $fds_leak]
-
     # warm-up phase
     # a) warm up code
     $code->() for (1 .. $warmup_passes);
@@ -194,16 +191,14 @@ sub _noleaks {
     # (ignore results)
     _platform_mem_size if $track_memory;
     _platform_fds if $track_fds;
-    %leaked_at = map { $_ => [0, 0] } (1 .. $passes);
+    my @leaked_at = ([0, 0]) x ($passes); # index: pass, value array[$mem_leak, $fds_leak]
 
-    # reset warmed-up leaked_at hash
-    %leaked_at = ();
-
+    # pre-allocate all variables, including those, which are used in cycle only
     my ($total_mem_leak, $total_fds_leak, $memory_hits) = (0, 0, 0);
+    my ($mem_t0, $fds_t0, $mem_t1, $fds_t1) = (0, 0, 0, 0);
 
     # execution phase
-    for my $pass (1 .. $passes) {
-        my ($mem_t0, $fds_t0, $mem_t1, $fds_t1) = (0, 0, 0, 0);
+    for my $pass (0 .. $passes - 1) {
         $mem_t0 = _platform_mem_size if $track_memory;
         $fds_t0 = _platform_fds if $track_fds;
         $code->();
@@ -216,15 +211,15 @@ sub _noleaks {
         my $leaked_fds = $fds_t1 - $fds_t0;
         $leaked_fds = 0 if ($leaked_fds < 0);
 
-        if (($leaked_mem > 0) || ($leaked_fds > 0)) {
-            $leaked_at{$pass} = [$leaked_mem, $leaked_fds];
-            $total_mem_leak += $leaked_mem;
-            $total_fds_leak += $leaked_fds;
-        }
+        $leaked_at[$pass]->[0] = $leaked_mem;
+        $leaked_at[$pass]->[1] = $leaked_fds;
+        $total_mem_leak += $leaked_mem;
+        $total_fds_leak += $leaked_fds;
+
         $memory_hits++ if ($leaked_mem > 0);
     }
 
-    return ($total_mem_leak, $total_fds_leak, $memory_hits, \%leaked_at);
+    return ($total_mem_leak, $total_fds_leak, $memory_hits, \@leaked_at);
 }
 
 
@@ -232,7 +227,7 @@ sub _noleaks {
 sub noleaks(%) {
     my %args = @_;
 
-    my ($mem, $fds, $mem_hits, $details) = _noleaks(%args);
+    my ($mem, $fds, $mem_hits) = _noleaks(%args);
 
     my $tolerate_hits = $args{tolerate_hits} || 0;
     my $track_memory  = $args{'track_memory'};
@@ -264,7 +259,8 @@ sub test_noleaks(%) {
         . ($track_fds    ? "$fds file descriptors" : "");
 
       my @lines;
-      while (my ($pass, $v) = each(%$details)) {
+      for my $pass (1 .. @$details) {
+        my $v = $details->[$pass-1];
         my $line = "pass $pass, leaked: "
           . ($track_memory ? $v->[0] . " bytes " : "")
           . ($track_fds    ? $v->[1] . "file descriptors" : "");
