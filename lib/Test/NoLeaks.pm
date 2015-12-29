@@ -163,7 +163,7 @@ BEGIN {
     };
 }
 
-sub _noleaks(%) {
+sub _noleaks {
     my %args = @_;
 
     # check arguments
