@@ -13,6 +13,128 @@ use base qw(Exporter);
 our @EXPORT = qw/test_noleaks/;
 our @EXPORT_OK = qw/noleaks/;
 
+
+=head1 NAME
+
+Test::NoLeaks - Memory and file descriptor leak detector
+
+=head1 VERSION
+
+0.01
+
+=head1 SYNOPSYS
+
+  use Test::NoLeaks;
+
+  test_noleaks (
+      code          => sub{
+        # code that might leak
+      },
+      track_memory  => 1,
+      track_fds     => 1,
+      passes        => 2,
+      warmup_passes => 1,
+      tolerate_hits => 0,
+  );
+
+  test_noleaks (
+      code          => sub { ... },
+      track_memory  => 1,
+      passes        => 2,
+  );
+
+  # old-school way
+  use Test::More;
+  use Test::NoLeaks qw/noleaks/;
+  ok noleaks(
+      code          => sub { ... },
+      track_memory  => ...,
+      track_fds     => ...,
+      passes        => ...,
+      warmup_passes => ...,
+    ), "non-leaked code description";
+
+=head1 DESCRIPTION
+
+It is hard to track memory leaks. There are a lot of perl modules (e.g.
+L<Test::LeakTrace>), that try to B<detect> and B<point> leaks. Unfortunately,
+they do not always work, and they are rather limited because they are not
+able to detect leaks in XS-code or external libraries.
+
+Instead of examining perl internals, this module offers a bit naive empirical
+approach: let the suspicious code to be launched in infinite loop
+some time and watch (via tools like C<top>)if the memory consumption by
+perl process increses over time. If it does, while it is expected to
+be constant (stabilized), then, surely, there are leaks.
+
+This approach is able only to B<detect> and not able to B<point> them. The
+module C<Test::NoLeaks> implements the general idea of the approach, which
+might be enough in many cases.
+
+=head1 INTERFACE
+
+=head3 C<< test_noleaks >>
+
+=head3 C<< noleaks >>
+
+The mandatory hash has the following members
+
+=over 2
+
+=item * C<code>
+
+Suspicious for leaks subroutine, that will be executed multiple times.
+
+=item * C<track_memory>
+
+=item * C<track_fds>
+
+Track memory or file descriptor leaks. At leas one of them should be
+specified.
+
+In B<Unices>, every socket is file descriptor too, so, C<track_fds>
+will be able to track unclosed sockets, i.e. network connections.
+
+=item * C<passes>
+
+How many times C<code> should be executed. If memory leak is too small,
+number of passes should be large enough to trigger additional pages
+allocation for perl process, and the leak will be detected.
+
+Page size is 4kb on linux, so, if C<code> leaks 4 bytes on every
+pass, then C<1024> passes should be specified.
+
+In general, the more passes are specified, the more chance to
+detect possible leaks.
+
+Default value is C<100>. Minimal value is C<2>.
+
+=item * C<warmup_passes>
+
+How many times the C<code> should be executed before module starts
+tracking resources consumption on executing the C<code> C<passes>
+times.
+
+If you have caches, memoizes etc., then C<warmup_passes> is your
+friend.
+
+Default value is C<0>.
+
+=item * C<tolerate_hits>
+
+How many passes, which considered leaked, should be ingnored, i.e.
+maximal number of possible false leak reports.
+
+Even if your code has no leaks, it might cause perl interpreter
+allocate additional memory pages, e.g. due to memory fragmentation.
+Those allocations are legal, and should not be treated as leaks.
+
+Default value is C<0>.
+
+=back
+
+=cut
+
 my $PAGE_SIZE;
 
 BEGIN {
@@ -156,5 +278,60 @@ sub test_noleaks(%) {
       fail("$summary");
     }
 }
+
+=head1 SOURCE CODE
+
+L<GitHub|https://github.com/binary-com/perl-Test-NoLeaks>
+
+=head1 AUTHOR
+
+binary.com, C<< <perl at binary.com> >>
+
+=head1 BUGS
+
+Please report any bugs or feature requests to
+L<https://github.com/binary-com/perl-Test-NoLeaks/issues>.
+
+=head1 LICENSE AND COPYRIGHT
+
+Copyright (C) 2015 binary.com
+
+This program is free software; you can redistribute it and/or modify it
+under the terms of the the Artistic License (2.0). You may obtain a
+copy of the full license at:
+
+L<http://www.perlfoundation.org/artistic_license_2_0>
+
+Any use, modification, and distribution of the Standard or Modified
+Versions is governed by this Artistic License. By using, modifying or
+distributing the Package, you accept this license. Do not use, modify,
+or distribute the Package, if you do not accept this license.
+
+If your Modified Version has been derived from a Modified Version made
+by someone other than you, you are nevertheless required to ensure that
+your Modified Version complies with the requirements of this license.
+
+This license does not grant you the right to use any trademark, service
+mark, tradename, or logo of the Copyright Holder.
+
+This license includes the non-exclusive, worldwide, free-of-charge
+patent license to make, have made, use, offer to sell, sell, import and
+otherwise transfer the Package with respect to any patent claims
+licensable by the Copyright Holder that are necessarily infringed by the
+Package. If you institute patent litigation (including a cross-claim or
+counterclaim) against any party alleging that the Package constitutes
+direct or contributory patent infringement, then this Artistic License
+to you shall terminate on the date that such litigation is filed.
+
+Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
+AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
+THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
+YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
+CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
+CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
+EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+=cut
 
 1;
