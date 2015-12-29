@@ -139,31 +139,29 @@ my $PAGE_SIZE;
 
 BEGIN {
     no strict "subs";
-    *_platform_mem_size = _linux_mem_size;
-    *_platform_fds = _linux_fds;
+
     $PAGE_SIZE = sysconf(_SC_PAGESIZE)
       or die("page size cannot be determined, Test::NoLeaks cannot be used");
-}
 
-sub _linux_mem_size {
-    my $class = shift;
-
-    open(my $fh, '<', '/proc/self/statm')
+    open(my $statm, '<', '/proc/self/statm')
         or die("couldn't access /proc/self/status : $!");
 
-    my $line = <$fh>;
-    my ($pages) = (split / /, $line)[0];
-    return $pages * $PAGE_SIZE;
-}
+    *_platform_mem_size = sub {
+        my $line = <$statm>;
+        seek($statm, 0, 0);
+        my ($pages) = (split / /, $line)[0];
+        return $pages * $PAGE_SIZE;
+    };
 
-sub _linux_fds {
     my $fd_dir = '/proc/self/fd';
-    opendir(my $dh, $fd_dir) || die "can't opendir $fd_dir: $!";
-    my $open_fd_count = () = readdir($dh);
-    closedir $dh;
-    return $open_fd_count;
+    opendir(my $dh, $fd_dir)
+      or die "can't opendir $fd_dir: $!";
+    *_platform_fds = sub {
+        my $open_fd_count = () = readdir($dh);
+        rewinddir($dh);
+        return $open_fd_count;
+    };
 }
-
 
 sub _noleaks(%) {
     my %args = @_;
