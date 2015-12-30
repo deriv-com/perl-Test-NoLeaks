@@ -11,7 +11,7 @@ WriteMakefile(
     NAME             => 'Test::NoLeaks',
     AUTHOR           => q{binary.com <perl@binary.com>},
     VERSION_FROM     => 'lib/Test/NoLeaks.pm',
-    ABSTRACT         => 'Convenient representation for nested Hash structures',
+    ABSTRACT         => 'Memory and file descriptor leak detector',
     LICENSE          => 'Artistic_2_0',
     ( eval { ExtUtils::MakeMaker->VERSION(6.64) } ?
         (
