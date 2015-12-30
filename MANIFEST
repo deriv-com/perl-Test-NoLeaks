@@ -5,3 +5,6 @@ MANIFEST
 README.md
 t/01-noleaks.t
 t/02-test_noleaks.t
+t/03-non-tolerate.t
+t/04-no-warm-up.t
+t/05-leak.t
