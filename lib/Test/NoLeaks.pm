@@ -6,7 +6,7 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.01_1';
+our $VERSION = '0.01_2';
 
 use base qw(Exporter);
 
