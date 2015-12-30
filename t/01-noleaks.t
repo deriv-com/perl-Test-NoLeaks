@@ -35,7 +35,7 @@ ok !noleaks(
   ), "there are leaks, because cache hasn't been warmed up";
 
 ok !noleaks(
-    code          => sub{ [map { rand } (0 ..  15000) ] },
+    code          => sub{ [map { rand } (0 ..  25000) ] },
     track_memory  => 1,
     track_fds     => 0,
     passes        => 5,
