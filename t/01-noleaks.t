@@ -6,6 +6,7 @@ use IO::Socket::INET;
 use Net::EmptyPort qw/empty_port/;
 use Test::More;
 use Test::NoLeaks qw/noleaks/;
+use Test::Warnings;
 
 ok noleaks(
     code          => sub{ },
@@ -25,22 +26,6 @@ ok noleaks(
     warmup_passes => 1,
   ), "no leaks on warm-up cache";
 
-my $cache2;
-ok !noleaks(
-    code          => sub{ $cache2 = [map { rand } (0 ..  15000) ] unless $cache2 },
-    track_memory  => 1,
-    track_fds     => 1,
-    passes        => 5,
-    warmup_passes => 0,
-  ), "there are leaks, because cache hasn't been warmed up";
-
-ok !noleaks(
-    code          => sub{ [map { rand } (0 ..  25000) ] },
-    track_memory  => 1,
-    track_fds     => 0,
-    passes        => 5,
-    warmup_passes => 0,
-  ), "non-tolerate way might trigger memory false memory leaks report";
 
 ok noleaks(
     code          => sub{ [map { rand } (0 ..  15000) ] },

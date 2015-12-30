@@ -24,9 +24,10 @@ WriteMakefile(
                 "POSIX"      => 0,
             },
             TEST_REQUIRES      => {
-                "File::Temp" => 0,
-                "Test::TCP"  => 0,
-                "IO"         => 0,
+                "File::Temp"     => 0,
+                "Test::TCP"      => 0,
+                "IO"             => 0,
+                "Test::Warnings" => 0,
             },
             META_MERGE => {
                 'meta-spec' => { version => 2 },
