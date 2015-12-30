@@ -1,9 +1,6 @@
 use strict;
 use warnings;
 
-use File::Temp qw/tempfile/;
-use IO::Socket::INET;
-use Net::EmptyPort qw/empty_port/;
 use Test::More;
 use Test::NoLeaks qw/noleaks/;
 use Test::Warnings;
