@@ -9,7 +9,7 @@ use Test::NoLeaks qw/noleaks/;
 use Test::Warnings;
 
 my $cache2;
-noleaks(
+ok !noleaks(
     code          => sub { $cache2 = "a" x (10_000_000) unless $cache2; },
     track_memory  => 1,
     track_fds     => 1,
