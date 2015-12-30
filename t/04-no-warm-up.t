@@ -10,15 +10,7 @@ use Test::Warnings;
 
 my $cache2;
 ok !noleaks(
-    code          => sub{
-      if (!$cache2) {
-          my @list;
-          for (my $i = 0; $i < 25000; $i++) {
-              push @list, map { rand } (1 .. 10);
-          }
-          $cache2 = \@list;
-      }
-    },
+    code          => sub { $cache2 = "a" x (10_000_000) unless $cache2; },
     track_memory  => 1,
     track_fds     => 1,
     passes        => 5,
