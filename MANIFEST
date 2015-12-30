@@ -1,0 +1,7 @@
+lib/Test/NoLeaks.pm
+LICENSE
+Makefile.PL
+MANIFEST
+README.md
+t/01-noleaks.t
+t/02-test_noleaks.t
