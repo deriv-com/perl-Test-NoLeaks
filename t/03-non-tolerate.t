@@ -10,7 +10,12 @@ use Test::Warnings;
 
 # request large array, that should trigger additional memory alloactions
 ok !noleaks(
-    code          => sub{ [map { rand } (0 ..  25000) ] },
+    code          => sub {
+        my @list;
+        for (my $i = 0; $i < 25000; $i++) {
+            push @list, map { rand } (1 .. 10);
+        }
+    },
     track_memory  => 1,
     track_fds     => 0,
     passes        => 5,
