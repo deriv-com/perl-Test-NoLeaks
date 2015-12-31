@@ -3,6 +3,7 @@ use warnings;
 
 use Test::More;
 use Test::NoLeaks;
+use Test::Warnings;
 
 test_noleaks (
     code          => sub{ },

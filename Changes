@@ -1,0 +1,7 @@
+0.02 2015-12-31 binary.com <perl@binary.com>
+ - Fix leaks on pass details;
+ - Produce detailed report only on passes with leaks.
+
+
+0.01 2015-12-31 binary.com <perl@binary.com>
+ - Initial version, works on Linux only.

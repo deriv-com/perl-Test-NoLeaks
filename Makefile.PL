@@ -11,8 +11,9 @@ WriteMakefile(
     NAME             => 'Test::NoLeaks',
     AUTHOR           => q{binary.com <perl@binary.com>},
     VERSION_FROM     => 'lib/Test/NoLeaks.pm',
-    ABSTRACT         => 'Convenient representation for nested Hash structures',
+    ABSTRACT         => 'Memory and file descriptor leak detector',
     LICENSE          => 'Artistic_2_0',
+    MIN_PERL_VERSION => '5.10.0',
     ( eval { ExtUtils::MakeMaker->VERSION(6.64) } ?
         (
             CONFIGURE_REQUIRES => {
@@ -24,9 +25,10 @@ WriteMakefile(
                 "POSIX"      => 0,
             },
             TEST_REQUIRES      => {
-                "File::Temp" => 0,
-                "Test::TCP"  => 0,
-                "IO"         => 0,
+                "File::Temp"     => 0,
+                "Test::TCP"      => 0,
+                "IO"             => 0,
+                "Test::Warnings" => 0,
             },
             META_MERGE => {
                 'meta-spec' => { version => 2 },

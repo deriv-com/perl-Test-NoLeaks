@@ -6,7 +6,7 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.01_1';
+our $VERSION = '0.02';
 
 use base qw(Exporter);
 
@@ -20,7 +20,7 @@ Test::NoLeaks - Memory and file descriptor leak detector
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 SYNOPSYS
 
@@ -191,7 +191,7 @@ sub _noleaks {
     # (ignore results)
     _platform_mem_size if $track_memory;
     _platform_fds if $track_fds;
-    my @leaked_at = ([0, 0]) x ($passes); # index: pass, value array[$mem_leak, $fds_leak]
+    my @leaked_at = map { [0, 0] } (1 .. $passes); # index: pass, value array[$mem_leak, $fds_leak]
 
     # pre-allocate all variables, including those, which are used in cycle only
     my ($total_mem_leak, $total_fds_leak, $memory_hits) = (0, 0, 0);
@@ -261,10 +261,13 @@ sub test_noleaks(%) {
       my @lines;
       for my $pass (1 .. @$details) {
         my $v = $details->[$pass-1];
-        my $line = "pass $pass, leaked: "
-          . ($track_memory ? $v->[0] . " bytes " : "")
-          . ($track_fds    ? $v->[1] . "file descriptors" : "");
-        push @lines, $line;
+        my ($mem, $fds) = @$v;
+        if ($mem || $fds) {
+          my $line = "pass $pass, leaked: "
+            . ($track_memory ? $mem . " bytes " : "")
+            . ($track_fds    ? $fds . " file descriptors" : "");
+          push @lines, $line;
+        }
       }
       my $report = join("\n", @lines);
 
