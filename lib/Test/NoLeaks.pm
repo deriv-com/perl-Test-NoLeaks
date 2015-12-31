@@ -6,7 +6,7 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use base qw(Exporter);
 
@@ -20,7 +20,7 @@ Test::NoLeaks - Memory and file descriptor leak detector
 
 =head1 VERSION
 
-0.01
+0.02
 
 =head1 SYNOPSYS
 
