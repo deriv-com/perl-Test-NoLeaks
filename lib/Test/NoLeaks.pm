@@ -144,7 +144,7 @@ Even if your code has no leaks, it might cause perl interpreter
 allocate additional memory pages, e.g. due to memory fragmentation.
 Those allocations are legal, and should not be treated as leaks.
 
-Use this B<only >when memory leaks are already fixed, but there
+Use this B<only> when memory leaks are already fixed, but there
 are still false leak reports from C<test_leak>. This value expected
 to be small enough, i.e. C<1> or C<2>. For additional assurance, please,
 increase C<passes> value, if C<tolarate_hits> is non-zero.

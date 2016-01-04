@@ -129,7 +129,7 @@ The mandatory hash has the following members
     allocate additional memory pages, e.g. due to memory fragmentation.
     Those allocations are legal, and should not be treated as leaks.
 
-    Use this **only **when memory leaks are already fixed, but there
+    Use this **only** when memory leaks are already fixed, but there
     are still false leak reports from `test_leak`. This value expected
     to be small enough, i.e. `1` or `2`. For additional assurance, please,
     increase `passes` value, if `tolarate_hits` is non-zero.
