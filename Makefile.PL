@@ -14,6 +14,7 @@ WriteMakefile(
     ABSTRACT         => 'Memory and file descriptor leak detector',
     LICENSE          => 'artistic_2',
     MIN_PERL_VERSION => '5.10.0',
+    clean            => { FILES => 'Test-NoLeaks-*' },
     ( eval { ExtUtils::MakeMaker->VERSION(6.64) } ?
         (
             CONFIGURE_REQUIRES => {
