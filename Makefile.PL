@@ -12,7 +12,7 @@ WriteMakefile(
     AUTHOR           => q{binary.com <perl@binary.com>},
     VERSION_FROM     => 'lib/Test/NoLeaks.pm',
     ABSTRACT         => 'Memory and file descriptor leak detector',
-    LICENSE          => 'Artistic_2_0',
+    LICENSE          => 'artistic_2',
     MIN_PERL_VERSION => '5.10.0',
     ( eval { ExtUtils::MakeMaker->VERSION(6.64) } ?
         (
