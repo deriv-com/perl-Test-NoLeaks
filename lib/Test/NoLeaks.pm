@@ -115,7 +115,7 @@ pass, then C<1024> passes should be specified.
 In general, the more passes are specified, the more chance to
 detect possible leaks.
 
-It is good idea to initally define C<passess> to some large number,
+It is good idea to initally define C<passes> to some large number,
 e.g. C<10_000> to be sure, that the suspicious code leaks, but then
 decrease to some smaller number, enough to produce test fail report,
 i.e. enough to produces 3-5 memory hits (additional pages allocations).
