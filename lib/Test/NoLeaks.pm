@@ -133,6 +133,23 @@ Default value is C<0>.
 
 =back
 
+=head1 LIMITATIONS
+
+=over 2
+
+=item * Currently it works propertly only on B<Linux>
+
+Patches or pull requests to support other OSes are welcome.
+
+=item * The module will not work propertly in B<fork>ed child
+
+It seems a little bit strange to use C<test_noleaks> or
+C<noleaks> in forked child, but if you really need that, please,
+send PR.
+
+=back
+
+
 =cut
 
 my $PAGE_SIZE;
