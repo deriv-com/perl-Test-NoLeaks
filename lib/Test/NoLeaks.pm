@@ -37,6 +37,14 @@ Test::NoLeaks - Memory and file descriptor leak detector
       tolerate_hits => 0,
   );
 
+  Sample output:
+  # pass 1, leaked: 225280 bytes 0 file descriptors
+  # pass 36, leaked: 135168 bytes 0 file descriptors
+  # pass 52, leaked: 319488 bytes 0 file descriptors
+  # pass 84, leaked: 135168 bytes 0 file descriptors
+  # pass 98, leaked: 155648 bytes 0 file descriptors
+  not ok 1214 - Leaked 970752 bytes (5 hits) 0 file descriptors
+
   test_noleaks (
       code          => sub { ... },
       track_memory  => 1,
@@ -107,6 +115,13 @@ pass, then C<1024> passes should be specified.
 In general, the more passes are specified, the more chance to
 detect possible leaks.
 
+It is good idea to initally define C<passess> to some large number,
+e.g. C<10_000> to be sure, that the suspicious code leaks, but then
+decrease to some smaller number, enough to produce test fail report,
+i.e. enough to produces 3-5 memory hits (additional pages allocations).
+This will speed up tests execution and will save CO2 atmospheric
+emissions a little bit.
+
 Default value is C<100>. Minimal value is C<2>.
 
 =item * C<warmup_passes>
@@ -129,9 +144,74 @@ Even if your code has no leaks, it might cause perl interpreter
 allocate additional memory pages, e.g. due to memory fragmentation.
 Those allocations are legal, and should not be treated as leaks.
 
+Use this B<only >when memory leaks are already fixed, but there
+are still false leak reports from C<test_leak>. This value expected
+to be small enough, i.e. C<1> or C<2>. For additional assurance, please,
+increase C<passes> value, if C<tolarate_hits> is non-zero.
+
 Default value is C<0>.
 
 =back
+
+=head1 MEMORY LEAKS TESTING TECHNIQUES
+
+C<Test::NoLeaks> can be used to test web applications for memory leaks.
+
+Let's consider you have the following suspicious code
+
+  sub might_leak {
+    my $t = Test::Mojo->new('MyApp');
+    $t->post_ok('/search.json' => form => {q => 'Perl'})
+        ->status_is(200);
+    ...;
+  }
+
+  test_noleaks (
+      code          => \&might_leak,
+      track_memory  => 1,
+      track_fds     => 1,
+      passes        => 1000,
+  );
+
+The C<might_leak> subroutine isn't optimal for leak detection, because it
+mixes infrastructure-related code (application) with request code. Let's
+consider, that there is a leak: every request creates some data and puts
+it into application, but forgets to do clean up. As soon as the application
+is re-created on every pass, the leaked data might be destroyed together
+with the application, and leak might remain undetected.
+
+So, the code under test should look much more production like, i.e.
+
+  my $t = Test::Mojo->new('MyApp');
+  ok($t);
+  sub might_leak {
+    $t->post_ok('/search.json' => form => {q => 'Perl'})
+        ->status_is(200);
+    ...;
+  }
+
+That way web-application is created only once, and leaks will be tracked
+on request-related code.
+
+Please, B<do not> use C<test_noleaks> more then once per test file. Consider
+the following example:
+
+  # (A)
+  test_noleaks(
+    code => &does_not_leak_but_consumes_large_amount_of_memory,
+    ...,
+  )
+
+  # (B)
+  test_noleaks(
+    code => &leaks_but_consumes_small_amount_of_memory,
+    ...
+  )
+
+In A-case OS already allocated large amount of memory for Perl interpreter.
+In case-B perl might just re-use them, without allocating new ones, and
+this will be false negative, i.e. memory leak might B<not> be reported.
+
 
 =head1 LIMITATIONS
 
