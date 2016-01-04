@@ -1,3 +1,7 @@
+0.03 2016-01-04 binary.com <perl@binary.com>
+ - Dropped Devel::CheckOS build time dependency;
+ - Improved documentation.
+
 0.02 2015-12-31 binary.com <perl@binary.com>
  - Fix leaks on pass details;
  - Produce detailed report only on passes with leaks.

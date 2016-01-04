@@ -1,11 +1,10 @@
 use strict;
 use warnings;
-use Devel::CheckOS qw/die_unsupported os_is/;
 use ExtUtils::MakeMaker;
 
-my $os_supproted = os_is 'Linux';
+my $os_supproted = $^O eq 'linux';
 
-die_unsupported unless $os_supproted;
+die("OS unsupported\n") unless $os_supproted;
 
 WriteMakefile(
     NAME             => 'Test::NoLeaks',
@@ -18,7 +17,6 @@ WriteMakefile(
     ( eval { ExtUtils::MakeMaker->VERSION(6.64) } ?
         (
             CONFIGURE_REQUIRES => {
-                "Devel::CheckOS"      => '0',
                 "ExtUtils::MakeMaker" => "6.64",
             },
             PREREQ_PM          => {
@@ -43,7 +41,6 @@ WriteMakefile(
             }
         ) : (
             PREREQ_PM => {
-                "Devel::CheckOS"      => '0',
                 "ExtUtils::MakeMaker" => '6.64',
                 "Test::More"          => 0,
                 "POSIX"               => 0,
