@@ -100,7 +100,7 @@ The mandatory hash has the following members
     In general, the more passes are specified, the more chance to
     detect possible leaks.
 
-    It is good idea to initally define `passess` to some large number,
+    It is good idea to initally define `passes` to some large number,
     e.g. `10_000` to be sure, that the suspicious code leaks, but then
     decrease to some smaller number, enough to produce test fail report,
     i.e. enough to produces 3-5 memory hits (additional pages allocations).
