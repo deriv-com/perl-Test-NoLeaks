@@ -8,7 +8,7 @@ Test::NoLeaks - Memory and file descriptor leak detector
 
 # VERSION
 
-0.03
+0.04
 
 # SYNOPSYS
 
