@@ -229,6 +229,9 @@ send PR.
 
 =back
 
+=head1 SEE ALSO
+
+L<Test::MemoryGrowth>
 
 =cut
 

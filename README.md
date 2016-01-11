@@ -207,6 +207,10 @@ this will be false negative, i.e. memory leak might **not** be reported.
     `noleaks` in forked child, but if you really need that, please,
     send PR.
 
+# SEE ALSO
+
+[Test::MemoryGrowth](https://metacpan.org/pod/Test::MemoryGrowth)
+
 # SOURCE CODE
 
 [GitHub](https://github.com/binary-com/perl-Test-NoLeaks)
