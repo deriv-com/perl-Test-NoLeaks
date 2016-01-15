@@ -8,7 +8,7 @@ Test::NoLeaks - Memory and file descriptor leak detector
 
 # VERSION
 
-0.03
+0.04
 
 # SYNOPSYS
 
@@ -176,6 +176,19 @@ So, the code under test should look much more production like, i.e.
 That way web-application is created only once, and leaks will be tracked
 on request-related code.
 
+Anyway, `might_leak` still wrong, because it unintentionally leaks due to
+use of direct or indirect [Test::More](https://metacpan.org/pod/Test::More) functions, like `ok` or
+`post_ok`. They should not be used; if you still need to assert, that
+`might_leak` works propertly, you can use `BAIL_OUT` subroutine,
+to cancel any further testing, e.g.
+
+    sub might_leak {
+      my $got = some_function_might_leak;
+      my $expected = "some_value";
+      BAIL_OUT('some_function_might_leak does not work propertly!')
+        unless $got eq $expected;
+    }
+
 Please, **do not** use `test_noleaks` more then once per test file. Consider
 the following example:
 
@@ -206,6 +219,10 @@ this will be false negative, i.e. memory leak might **not** be reported.
     It seems a little bit strange to use `test_noleaks` or
     `noleaks` in forked child, but if you really need that, please,
     send PR.
+
+# SEE ALSO
+
+[Test::MemoryGrowth](https://metacpan.org/pod/Test::MemoryGrowth)
 
 # SOURCE CODE
 
