@@ -6,6 +6,12 @@ my $os_supproted = $^O eq 'linux';
 
 die("OS unsupported\n") unless $os_supproted;
 
+# Test::TCP has socket leaks in 2.15, lets avoid using it for testing
+my $test_tcp_minimum_version = 0;
+if (eval { require Test::TCP; $Test::TCP::VERSION == 2.15 }) {
+    $test_tcp_minimum_version = '2.16';
+}
+
 WriteMakefile(
     NAME             => 'Test::NoLeaks',
     AUTHOR           => q{binary.com <perl@binary.com>},
@@ -25,7 +31,7 @@ WriteMakefile(
             },
             TEST_REQUIRES      => {
                 "File::Temp"     => 0,
-                "Test::TCP"      => 0,
+                "Test::TCP"      => $test_tcp_minimum_version,
                 "IO"             => 0,
                 "Test::Warnings" => 0,
             },

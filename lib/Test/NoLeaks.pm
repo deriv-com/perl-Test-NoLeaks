@@ -6,7 +6,7 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.04';
+our $VERSION = '0.05';
 
 use base qw(Exporter);
 
@@ -20,7 +20,7 @@ Test::NoLeaks - Memory and file descriptor leak detector
 
 =head1 VERSION
 
-0.04
+0.05
 
 =head1 SYNOPSYS
 
@@ -406,7 +406,7 @@ L<https://github.com/binary-com/perl-Test-NoLeaks/issues>.
 
 =head1 LICENSE AND COPYRIGHT
 
-Copyright (C) 2015 binary.com
+Copyright (C) 2015, 2016 binary.com
 
 This program is free software; you can redistribute it and/or modify it
 under the terms of the the Artistic License (2.0). You may obtain a

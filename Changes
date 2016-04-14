@@ -1,3 +1,7 @@
+0.05 2016-04-13 binary.com <perl@binary.com>
+ - Avoid testing via Test::TCP v2.15, as it has file-descriptors leak
+
+
 0.04 2016-01-01 binary.com <perl@binary.com>
  - Added link to similar module (gh#1)
  - Improved documentation.
