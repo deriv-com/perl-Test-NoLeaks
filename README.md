@@ -1,6 +1,7 @@
 # Test::NoLeaks
 
 ![Build status](https://api.travis-ci.org/binary-com/perl-Test-NoLeaks.png "Build status")
+[![codecov](https://codecov.io/gh/binary-com/perl-Test-NoLeaks/branch/master/graph/badge.svg)](https://codecov.io/gh/binary-com/perl-Test-NoLeaks)
 
 # NAME
 
