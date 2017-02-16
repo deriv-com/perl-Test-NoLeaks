@@ -1,3 +1,6 @@
+{{$NEXT}}
+ - switch to dzil
+
 0.05 2016-04-13 binary.com <perl@binary.com>
  - Avoid testing via Test::TCP v2.15, as it has file-descriptors leak
 
