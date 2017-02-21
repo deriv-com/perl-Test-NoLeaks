@@ -6,21 +6,16 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use base qw(Exporter);
 
-our @EXPORT = qw/test_noleaks/;
+our @EXPORT    = qw/test_noleaks/;    ## no critic (ProhibitAutomaticExportation)
 our @EXPORT_OK = qw/noleaks/;
-
 
 =head1 NAME
 
 Test::NoLeaks - Memory and file descriptor leak detector
-
-=head1 VERSION
-
-0.05
 
 =head1 SYNOPSYS
 
@@ -253,12 +248,12 @@ L<Test::MemoryGrowth>
 my $PAGE_SIZE;
 
 BEGIN {
-    no strict "subs";
+    no strict "subs";    ## no critic (ProhibitNoStrict ProhibitProlongedStrictureOverride)
 
     $PAGE_SIZE = sysconf(_SC_PAGESIZE)
-      or die("page size cannot be determined, Test::NoLeaks cannot be used");
+        or die("page size cannot be determined, Test::NoLeaks cannot be used");
 
-    open(my $statm, '<', '/proc/self/statm')
+    open(my $statm, '<', '/proc/self/statm')    ## no critic (RequireBriefOpen)
         or die("couldn't access /proc/self/status : $!");
     *_platform_mem_size = sub {
         my $line = <$statm>;
@@ -269,7 +264,7 @@ BEGIN {
 
     my $fd_dir = '/proc/self/fd';
     opendir(my $dh, $fd_dir)
-      or die "can't opendir $fd_dir: $!";
+        or die "can't opendir $fd_dir: $!";
     *_platform_fds = sub {
         my $open_fd_count = () = readdir($dh);
         rewinddir($dh);
@@ -305,8 +300,8 @@ sub _noleaks {
     # b) warm-up package itself, as it might cause additional memory (re) allocations
     # (ignore results)
     _platform_mem_size if $track_memory;
-    _platform_fds if $track_fds;
-    my @leaked_at = map { [0, 0] } (1 .. $passes); # index: pass, value array[$mem_leak, $fds_leak]
+    _platform_fds      if $track_fds;
+    my @leaked_at = map { [0, 0] } (1 .. $passes);    # index: pass, value array[$mem_leak, $fds_leak]
 
     # pre-allocate all variables, including those, which are used in cycle only
     my ($total_mem_leak, $total_fds_leak, $memory_hits) = (0, 0, 0);
@@ -315,10 +310,10 @@ sub _noleaks {
     # execution phase
     for my $pass (0 .. $passes - 1) {
         $mem_t0 = _platform_mem_size if $track_memory;
-        $fds_t0 = _platform_fds if $track_fds;
+        $fds_t0 = _platform_fds      if $track_fds;
         $code->();
         $mem_t1 = _platform_mem_size if $track_memory;
-        $fds_t1 = _platform_fds if $track_fds;
+        $fds_t1 = _platform_fds      if $track_fds;
 
         my $leaked_mem = $mem_t1 - $mem_t0;
         $leaked_mem = 0 if ($leaked_mem < 0);
@@ -337,9 +332,7 @@ sub _noleaks {
     return ($total_mem_leak, $total_fds_leak, $memory_hits, \@leaked_at);
 }
 
-
-
-sub noleaks(%) {
+sub noleaks(%) {    ## no critic (ProhibitSubroutinePrototypes)
     my %args = @_;
 
     my ($mem, $fds, $mem_hits) = _noleaks(%args);
@@ -353,7 +346,7 @@ sub noleaks(%) {
     return !($has_fd_leaks || $has_mem_leaks);
 }
 
-sub test_noleaks(%) {
+sub test_noleaks(%) {    ## no critic (ProhibitSubroutinePrototypes)
     my %args = @_;
     my ($mem, $fds, $mem_hits, $details) = _noleaks(%args);
 
@@ -369,26 +362,23 @@ sub test_noleaks(%) {
     if (!$has_leaks) {
         pass("no leaks have been found");
     } else {
-      my $summary = "Leaked "
-        . ($track_memory ? "$mem bytes ($mem_hits hits) " : "")
-        . ($track_fds    ? "$fds file descriptors" : "");
+        my $summary = "Leaked " . ($track_memory ? "$mem bytes ($mem_hits hits) " : "") . ($track_fds ? "$fds file descriptors" : "");
 
-      my @lines;
-      for my $pass (1 .. @$details) {
-        my $v = $details->[$pass-1];
-        my ($mem, $fds) = @$v;
-        if ($mem || $fds) {
-          my $line = "pass $pass, leaked: "
-            . ($track_memory ? $mem . " bytes " : "")
-            . ($track_fds    ? $fds . " file descriptors" : "");
-          push @lines, $line;
+        my @lines;
+        for my $pass (1 .. @$details) {
+            my $v = $details->[$pass - 1];
+            my ($mem, $fds) = @$v;
+            if ($mem || $fds) {
+                my $line = "pass $pass, leaked: " . ($track_memory ? $mem . " bytes " : "") . ($track_fds ? $fds . " file descriptors" : "");
+                push @lines, $line;
+            }
         }
-      }
-      my $report = join("\n", @lines);
+        my $report = join("\n", @lines);
 
-      note($report);
-      fail("$summary");
+        note($report);
+        fail("$summary");
     }
+    return;
 }
 
 =head1 SOURCE CODE
@@ -403,46 +393,6 @@ binary.com, C<< <perl at binary.com> >>
 
 Please report any bugs or feature requests to
 L<https://github.com/binary-com/perl-Test-NoLeaks/issues>.
-
-=head1 LICENSE AND COPYRIGHT
-
-Copyright (C) 2015, 2016 binary.com
-
-This program is free software; you can redistribute it and/or modify it
-under the terms of the the Artistic License (2.0). You may obtain a
-copy of the full license at:
-
-L<http://www.perlfoundation.org/artistic_license_2_0>
-
-Any use, modification, and distribution of the Standard or Modified
-Versions is governed by this Artistic License. By using, modifying or
-distributing the Package, you accept this license. Do not use, modify,
-or distribute the Package, if you do not accept this license.
-
-If your Modified Version has been derived from a Modified Version made
-by someone other than you, you are nevertheless required to ensure that
-your Modified Version complies with the requirements of this license.
-
-This license does not grant you the right to use any trademark, service
-mark, tradename, or logo of the Copyright Holder.
-
-This license includes the non-exclusive, worldwide, free-of-charge
-patent license to make, have made, use, offer to sell, sell, import and
-otherwise transfer the Package with respect to any patent claims
-licensable by the Copyright Holder that are necessarily infringed by the
-Package. If you institute patent litigation (including a cross-claim or
-counterclaim) against any party alleging that the Package constitutes
-direct or contributory patent infringement, then this Artistic License
-to you shall terminate on the date that such litigation is filed.
-
-Disclaimer of Warranty: THE PACKAGE IS PROVIDED BY THE COPYRIGHT HOLDER
-AND CONTRIBUTORS "AS IS' AND WITHOUT ANY EXPRESS OR IMPLIED WARRANTIES.
-THE IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
-PURPOSE, OR NON-INFRINGEMENT ARE DISCLAIMED TO THE EXTENT PERMITTED BY
-YOUR LOCAL LAW. UNLESS REQUIRED BY LAW, NO COPYRIGHT HOLDER OR
-CONTRIBUTOR WILL BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, OR
-CONSEQUENTIAL DAMAGES ARISING IN ANY WAY OUT OF THE USE OF THE PACKAGE,
-EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 =cut
 
