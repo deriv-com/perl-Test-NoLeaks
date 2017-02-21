@@ -6,13 +6,12 @@ use POSIX qw/sysconf _SC_PAGESIZE/;
 use Test::Builder;
 use Test::More;
 
-our $VERSION = '0.05';
+our $VERSION = '0.06';
 
 use base qw(Exporter);
 
-our @EXPORT = qw/test_noleaks/; ## no critic (ProhibitAutomaticExportation)
+our @EXPORT    = qw/test_noleaks/;    ## no critic (ProhibitAutomaticExportation)
 our @EXPORT_OK = qw/noleaks/;
-
 
 =head1 NAME
 
@@ -249,12 +248,12 @@ L<Test::MemoryGrowth>
 my $PAGE_SIZE;
 
 BEGIN {
-    no strict "subs"; ## no critic (ProhibitNoStrict ProhibitProlongedStrictureOverride)
+    no strict "subs";    ## no critic (ProhibitNoStrict ProhibitProlongedStrictureOverride)
 
     $PAGE_SIZE = sysconf(_SC_PAGESIZE)
-      or die("page size cannot be determined, Test::NoLeaks cannot be used");
+        or die("page size cannot be determined, Test::NoLeaks cannot be used");
 
-    open(my $statm, '<', '/proc/self/statm')   ## no critic (RequireBriefOpen)
+    open(my $statm, '<', '/proc/self/statm')    ## no critic (RequireBriefOpen)
         or die("couldn't access /proc/self/status : $!");
     *_platform_mem_size = sub {
         my $line = <$statm>;
@@ -265,7 +264,7 @@ BEGIN {
 
     my $fd_dir = '/proc/self/fd';
     opendir(my $dh, $fd_dir)
-      or die "can't opendir $fd_dir: $!";
+        or die "can't opendir $fd_dir: $!";
     *_platform_fds = sub {
         my $open_fd_count = () = readdir($dh);
         rewinddir($dh);
@@ -301,8 +300,8 @@ sub _noleaks {
     # b) warm-up package itself, as it might cause additional memory (re) allocations
     # (ignore results)
     _platform_mem_size if $track_memory;
-    _platform_fds if $track_fds;
-    my @leaked_at = map { [0, 0] } (1 .. $passes); # index: pass, value array[$mem_leak, $fds_leak]
+    _platform_fds      if $track_fds;
+    my @leaked_at = map { [0, 0] } (1 .. $passes);    # index: pass, value array[$mem_leak, $fds_leak]
 
     # pre-allocate all variables, including those, which are used in cycle only
     my ($total_mem_leak, $total_fds_leak, $memory_hits) = (0, 0, 0);
@@ -311,10 +310,10 @@ sub _noleaks {
     # execution phase
     for my $pass (0 .. $passes - 1) {
         $mem_t0 = _platform_mem_size if $track_memory;
-        $fds_t0 = _platform_fds if $track_fds;
+        $fds_t0 = _platform_fds      if $track_fds;
         $code->();
         $mem_t1 = _platform_mem_size if $track_memory;
-        $fds_t1 = _platform_fds if $track_fds;
+        $fds_t1 = _platform_fds      if $track_fds;
 
         my $leaked_mem = $mem_t1 - $mem_t0;
         $leaked_mem = 0 if ($leaked_mem < 0);
@@ -333,9 +332,7 @@ sub _noleaks {
     return ($total_mem_leak, $total_fds_leak, $memory_hits, \@leaked_at);
 }
 
-
-
-sub noleaks(%) { ## no critic (ProhibitSubroutinePrototypes)
+sub noleaks(%) {    ## no critic (ProhibitSubroutinePrototypes)
     my %args = @_;
 
     my ($mem, $fds, $mem_hits) = _noleaks(%args);
@@ -349,7 +346,7 @@ sub noleaks(%) { ## no critic (ProhibitSubroutinePrototypes)
     return !($has_fd_leaks || $has_mem_leaks);
 }
 
-sub test_noleaks(%) { ## no critic (ProhibitSubroutinePrototypes)
+sub test_noleaks(%) {    ## no critic (ProhibitSubroutinePrototypes)
     my %args = @_;
     my ($mem, $fds, $mem_hits, $details) = _noleaks(%args);
 
@@ -365,25 +362,21 @@ sub test_noleaks(%) { ## no critic (ProhibitSubroutinePrototypes)
     if (!$has_leaks) {
         pass("no leaks have been found");
     } else {
-      my $summary = "Leaked "
-        . ($track_memory ? "$mem bytes ($mem_hits hits) " : "")
-        . ($track_fds    ? "$fds file descriptors" : "");
+        my $summary = "Leaked " . ($track_memory ? "$mem bytes ($mem_hits hits) " : "") . ($track_fds ? "$fds file descriptors" : "");
 
-      my @lines;
-      for my $pass (1 .. @$details) {
-        my $v = $details->[$pass-1];
-        my ($mem, $fds) = @$v;
-        if ($mem || $fds) {
-          my $line = "pass $pass, leaked: "
-            . ($track_memory ? $mem . " bytes " : "")
-            . ($track_fds    ? $fds . " file descriptors" : "");
-          push @lines, $line;
+        my @lines;
+        for my $pass (1 .. @$details) {
+            my $v = $details->[$pass - 1];
+            my ($mem, $fds) = @$v;
+            if ($mem || $fds) {
+                my $line = "pass $pass, leaked: " . ($track_memory ? $mem . " bytes " : "") . ($track_fds ? $fds . " file descriptors" : "");
+                push @lines, $line;
+            }
         }
-      }
-      my $report = join("\n", @lines);
+        my $report = join("\n", @lines);
 
-      note($report);
-      fail("$summary");
+        note($report);
+        fail("$summary");
     }
     return;
 }
