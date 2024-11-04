@@ -7,7 +7,8 @@ use Test::Warnings;
 
 # request large array, that should trigger additional memory alloactions
 ok !noleaks(
-    code          => sub { my $x = "a" x (10_000_000); },
+    code          => sub { my $x = "a" x (10_000_000);
+                           $x .= localtime},
     track_memory  => 1,
     track_fds     => 0,
     passes        => 5,
